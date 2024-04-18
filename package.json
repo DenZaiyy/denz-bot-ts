@@ -1,0 +1,25 @@
+{
+    "name": "denz-bot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.ts",
+    "scripts": {
+        "start": "clear && node dist/index.js",
+        "dev": "clear && nodemon dist/index.js",
+        "build": "clear && npx tsc",
+        "watch": "npx tsc --watch"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.4.5"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.7",
+        "tsup": "^8.0.2",
+        "tsx": "^4.7.2",
+        "typescript": "^5.4.5"
+    }
+}
