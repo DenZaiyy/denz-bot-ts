@@ -3,7 +3,7 @@ dotenv.config();
 
 const { DISCORD_TOKEN, DISCORD_CLIENT_ID, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_CHANNEL } = process.env;
 
-if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID || !TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET || !TWITCH_CHANNEL) {
+if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
     throw new Error(
         "Missing environement variables. Please check your .env file."
     );
@@ -12,7 +12,5 @@ if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID || !TWITCH_CLIENT_ID || !TWITCH_CLIENT_
 export const config = {
     DISCORD_TOKEN,
     DISCORD_CLIENT_ID,
-    TWITCH_CLIENT_ID,
-    TWITCH_CLIENT_SECRET,
-    TWITCH_CHANNEL
+
 };

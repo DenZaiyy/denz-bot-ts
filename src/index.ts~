@@ -28,7 +28,7 @@ const twitchAPI = new TwitchAPI(config.TWITCH_CLIENT_ID, config.TWITCH_CLIENT_SE
 client.on("ready", async () => {
     console.log(`🤖 ${client.user?.username} is ready! 🤖`);
     await twitchAPI.createSubscription();
-    await twitchAPI.getTwitchIDFromUsername("denzaiyy");
+    await twitchAPI.getTwitchIDFromUsername();
 });
 
 // client.on(Events.GuildCreate, async (guild) => {
