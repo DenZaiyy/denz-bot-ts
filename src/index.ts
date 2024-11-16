@@ -28,8 +28,6 @@ const twitchAPI = new TwitchAPI(
     config.TWITCH_CLIENT_SECRET
 );
 
-let hasNotified = false;
-let userNameTwitch = "";
 let notifiedChannels: { [key: string]: boolean } = {};
 
 async function isStreamLive(
