@@ -1,107 +1,110 @@
-import { SlashCommand } from "./types";
-import { Client, Collection, GatewayIntentBits } from "discord.js";
-import { readdirSync } from "fs";
-import { join } from "path";
-import { config } from "./config";
+import express from "express";
 import TwitchAPI from "./twitchAPI";
+import crypto from "crypto";
+import { config } from "./config";
+const port = 8080;
+const app = express();
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.MessageContent,
-    ],
-});
-
-client.slashCommands = new Collection<string, SlashCommand>();
-
-const handlersDirs = join(__dirname, "./handlers");
-readdirSync(handlersDirs).forEach((file) => {
-    if (!file.endsWith(".js")) return;
-    require(join(handlersDirs, file))(client);
-});
-
-const twitchAPI = new TwitchAPI(
-    config.TWITCH_CLIENT_ID,
-    config.TWITCH_CLIENT_SECRET
+const twitchApi = new TwitchAPI(
+    process.env.TWITCH_CLIENT_ID,
+    process.env.TWITCH_CLIENT_SECRET
 );
 
-let notifiedChannels: { [key: string]: boolean } = {};
+app.use(
+    express.raw({
+        // Need raw message body for signature verification
+        type: "application/json",
+    })
+);
 
-async function isStreamLive(
-    oauthToken: string,
-    channel: string
-): Promise<boolean> {
-    const url = `https://api.twitch.tv/helix/streams?user_login=${channel}`;
-    try {
-        const response = await fetch(url, {
-            headers: {
-                "Client-Id": config.TWITCH_CLIENT_ID,
-                Authorization: `Bearer ${oauthToken}`,
-            },
-        });
+app.get("/", (req, res) => {
+    console.log(twitchApi.createSubscription());
 
-        const data = await response.json();
-        return data.data.length > 0;
-    } catch (error) {
-        console.error(`Error checking stream status for ${channel}:`, error);
-        return false;
-    }
-}
+    res.send("Hello World!");
+});
 
-async function sendStreamNotification(streamerName: string) {
-    try {
-        const channel = await client.channels.fetch(
-            config.DISCORD_STREAM_CHANNEL_ID
-        );
-        if (channel?.isTextBased()) {
-            await channel.send(
-                `🚨 @everyone ${streamerName} is now live on Twitch!\nWatch here: https://www.twitch.tv/${streamerName} 🚨`
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}, http://localhost:${port}`);
+});
+
+// Notification request headers
+const TWITCH_MESSAGE_ID = "Twitch-Eventsub-Message-Id".toLowerCase();
+const TWITCH_MESSAGE_TIMESTAMP =
+    "Twitch-Eventsub-Message-Timestamp".toLowerCase();
+const TWITCH_MESSAGE_SIGNATURE =
+    "Twitch-Eventsub-Message-Signature".toLowerCase();
+const MESSAGE_TYPE = "Twitch-Eventsub-Message-Type".toLowerCase();
+
+// Notification message types
+const MESSAGE_TYPE_VERIFICATION = "webhook_callback_verification";
+const MESSAGE_TYPE_NOTIFICATION = "notification";
+const MESSAGE_TYPE_REVOCATION = "revocation";
+
+// Prepend this string to the HMAC that's created from the message
+const HMAC_PREFIX = "sha256=";
+
+app.post("/twitch/webhook", (req, res) => {
+    let secret = config.TWITCH_SECRET;
+    let message = getHmacMessage(req);
+    let hmac = HMAC_PREFIX + getHmac(secret, message); // Signature to compare
+
+    if (true === verifyMessage(hmac, req.headers[TWITCH_MESSAGE_SIGNATURE])) {
+        console.log("signatures match");
+
+        // Get JSON object from body, so you can process the message.
+        let notification = JSON.parse(req.body);
+
+        if (MESSAGE_TYPE_NOTIFICATION === req.headers[MESSAGE_TYPE]) {
+            // TODO: Do something with the event's data.
+
+            console.log(`Event type: ${notification.subscription.type}`);
+            console.log(JSON.stringify(notification.event, null, 4));
+
+            res.sendStatus(204);
+        } else if (MESSAGE_TYPE_VERIFICATION === req.headers[MESSAGE_TYPE]) {
+            res.set("Content-Type", "text/plain")
+                .status(200)
+                .send(notification.challenge);
+        } else if (MESSAGE_TYPE_REVOCATION === req.headers[MESSAGE_TYPE]) {
+            res.sendStatus(204);
+
+            console.log(
+                `${notification.subscription.type} notifications revoked!`
+            );
+            console.log(`reason: ${notification.subscription.status}`);
+            console.log(
+                `condition: ${JSON.stringify(
+                    notification.subscription.condition,
+                    null,
+                    4
+                )}`
             );
         } else {
-            console.log(
-                "Could not find the Discord channel or it is not a text channel."
-            );
-        }
-    } catch (error) {
-        console.error("Error sending notification to Discord channel:", error);
-    }
-}
-
-async function checkStreamStatus() {
-    const oauthToken = await twitchAPI.getTwitchOAuthToken();
-    if (oauthToken) {
-        const channels = config.TWITCH_CHANNELS.split(",");
-
-        for (const channel of channels) {
-            const channelName = channel.trim();
-            const isLive = await isStreamLive(oauthToken, channelName);
-
-            if (isLive && !notifiedChannels[channelName]) {
-                await sendStreamNotification(channelName);
-                notifiedChannels[channelName] = true;
-            } else if (!isLive && notifiedChannels[channelName]) {
-                notifiedChannels[channelName] = false;
-                console.log(`${channelName} is offline.`);
-            }
+            res.sendStatus(204);
+            console.log(`Unknown message type: ${req.headers[MESSAGE_TYPE]}`);
         }
     } else {
-        console.log("Twitch OAuth token not found.");
+        console.log("403"); // Signatures didn't match.
+        res.sendStatus(403);
     }
+});
+
+// Build the message used to get the HMAC.
+function getHmacMessage(request) {
+    return (
+        request.headers[TWITCH_MESSAGE_ID] +
+        request.headers[TWITCH_MESSAGE_TIMESTAMP] +
+        request.body
+    );
 }
 
-setInterval(checkStreamStatus, 6000);
+function getHmac(secret, message) {
+    return crypto.createHmac("sha256", secret).update(message).digest("hex");
+}
 
-/* client.on("ready", async () => {
-    console.log(`🤖 ${client.user?.username} is ready! 🤖`);
-    await twitchAPI.createSubscription();
-    await twitchAPI.getTwitchIDFromUsername("denzaiyy");
-}); */
-
-// client.on(Events.GuildCreate, async (guild) => {
-//     await deployCommands({ guildId: guild.id });
-// });
-
-client.login(config.DISCORD_TOKEN).catch(console.error);
+function verifyMessage(hmac, verifySignature) {
+    return crypto.timingSafeEqual(
+        Buffer.from(hmac),
+        Buffer.from(verifySignature)
+    );
+}

@@ -44,35 +44,40 @@ export default class TwitchAPI {
         });
     }
 
-    /* private async createSubscription() {
-        const response = await fetch(
-            "https://api.twitch.tv/helix/eventsub/subscriptions",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Client-ID": this._clientID,
-                    Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
-                },
-                body: JSON.stringify({
-                    type: "stream.online",
-                    version: "1",
-                    condition: {
-                        broadcaster_user_id: await this.getTwitchIDFromUsername(
-                            config.TWITCH_CHANNEL
-                        ),
+    public async createSubscription() {
+        const events = ["stream.online", "stream.offline"];
+        events.map(async (event) => {
+            const response = await fetch(
+                "https://api.twitch.tv/helix/eventsub/subscriptions",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Client-ID": this._clientID,
+                        Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
                     },
-                    transport: {
-                        method: "webhook",
-                        callback: "https://denzaiyytv.loca.lt/twitch/webbook",
-                    },
-                }),
-            }
-        );
+                    body: JSON.stringify({
+                        type: event,
+                        version: "1",
+                        condition: {
+                            broadcaster_user_id:
+                                await this.getTwitchIDFromUsername(
+                                    config.TWITCH_CHANNEL
+                                ),
+                        },
+                        transport: {
+                            method: "webhook",
+                            callback:
+                                "https://twelve-geese-bathe.loca.lt/twitch/webhook",
+                            secret: config.TWITCH_SECRET,
+                        },
+                    }),
+                }
+            );
 
-        return await response.json().then((data) => {
-            console.log(data);
-            return data;
+            if (response.status >= 300) {
+                console.error("Failed to create subscription", response);
+            }
         });
-    } */
+    }
 }

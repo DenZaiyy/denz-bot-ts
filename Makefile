@@ -1,4 +1,4 @@
 .PHONY: online
 
 online:
-	lt --port 8000 --subdomain=denzaiyytv
+	lt --port 8080 --subdomain=denzaiyytv
