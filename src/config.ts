@@ -4,6 +4,7 @@ dotenv.config({ path: ".env.local" });
 const {
     DISCORD_TOKEN,
     DISCORD_CLIENT_ID,
+    DISCORD_GUILD_ID,
     DISCORD_STREAM_CHANNEL_ID,
     TWITCH_CLIENT_ID,
     TWITCH_CLIENT_SECRET,
@@ -15,6 +16,7 @@ const {
 if (
     !DISCORD_TOKEN ||
     !DISCORD_CLIENT_ID ||
+    !DISCORD_GUILD_ID ||
     !DISCORD_STREAM_CHANNEL_ID ||
     !TWITCH_CLIENT_ID ||
     !TWITCH_CLIENT_SECRET ||
@@ -30,6 +32,7 @@ if (
 export const config = {
     DISCORD_TOKEN,
     DISCORD_CLIENT_ID,
+    DISCORD_GUILD_ID,
     DISCORD_STREAM_CHANNEL_ID,
     TWITCH_CLIENT_ID,
     TWITCH_CLIENT_SECRET,
