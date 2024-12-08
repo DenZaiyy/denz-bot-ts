@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Guild {
+  guildId        String   @unique // Utilisé comme clé étrangère
+  name           String
+  prefix         String   @default("!")
+  welcomeChannel String?
+  members        Member[] @relation("GuildMembers")
+}
+
+model Member {
+  userId   String    @unique
+  userName String
+  role     String
+  guild    Guild     @relation("GuildMembers", fields: [guildId], references: [guildId])
+  guildId  String
+  joinedAt DateTime? @default(now())
+}
