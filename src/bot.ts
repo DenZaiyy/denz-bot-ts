@@ -1,5 +1,13 @@
 import { SlashCommand } from "./types";
-import { Client, Collection, GatewayIntentBits } from "discord.js";
+import {
+    Client,
+    Collection,
+    GatewayIntentBits,
+    TextChannel,
+    Channel,
+    NewsChannel,
+    DMChannel,
+} from "discord.js";
 import { readdirSync } from "fs";
 import { join } from "path";
 import { config } from "./config";
@@ -63,12 +71,16 @@ async function isStreamLive(
 
 async function sendStreamNotification(streamerName: string) {
     try {
-        const channel = await client.channels.fetch(
+        const channel: Channel | null = await client.channels.fetch(
             config.DISCORD_STREAM_CHANNEL_ID
         );
-        if (channel?.isTextBased()) {
+        if (
+            channel instanceof TextChannel ||
+            channel instanceof NewsChannel ||
+            channel instanceof DMChannel
+        ) {
             await channel.send(
-                `🚨 @everyone **${userName}** viens de lancer son live sur Twitch!\n**Titre:** ${streamTitle}\n**Catégorie:** ${category}\nRejoint nous ici: https://www.twitch.tv/${streamerName} 🚨`
+                `🚨 @everyone **${userName}** viens de lancer son live sur Twitch!\n**Titre:** ${streamTitle}\n**Catégorie:** ${category}\nRejoint le ici: https://www.twitch.tv/${streamerName} 🚨`
             );
         } else {
             console.log(
@@ -103,9 +115,5 @@ async function checkStreamStatus() {
 }
 
 setInterval(checkStreamStatus, 60000);
-
-// client.on(Events.GuildCreate, async (guild) => {
-//     await deployCommands({ guildId: guild.id });
-// });
 
 client.login(config.DISCORD_TOKEN).catch(console.error);
