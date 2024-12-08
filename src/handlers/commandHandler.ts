@@ -5,7 +5,7 @@ import { SlashCommand } from "../types";
 import { config } from "../config";
 
 module.exports = async (client: Client) => {
-    const body = [];
+    const body: Array<SlashCommand> = [];
     let slashCommandsDir = join(__dirname, "../slashCommands");
 
     readdirSync(slashCommandsDir).forEach((file) => {
@@ -23,10 +23,30 @@ module.exports = async (client: Client) => {
     const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
 
     try {
-        await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
-            body: body,
-        });
+        console.log("⏳ Suppression et réactualisation des commandes...");
+
+        // Suppression des commandes existantes (serveur spécifique)
+        await rest.put(
+            Routes.applicationGuildCommands(
+                config.DISCORD_CLIENT_ID,
+                config.DISCORD_GUILD_ID
+            ),
+            {
+                body: [],
+            }
+        );
+        console.log("✅ Commandes existantes supprimées.");
+
+        await rest.put(
+            Routes.applicationGuildCommands(
+                config.DISCORD_CLIENT_ID,
+                config.DISCORD_GUILD_ID
+            ),
+            {
+                body: body,
+            }
+        );
     } catch (error) {
-        console.error(error);
+        console.error("❌ Erreur lors de la mise à jour des commandes:", error);
     }
 };
