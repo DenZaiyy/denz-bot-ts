@@ -13,7 +13,7 @@ export const command: SlashCommand = {
                 .setRequired(true);
         }),
     execute: async (interaction) => {
-        const message = interaction.options.get("message").value.toString();
+        const message = interaction.options.get("message")?.value?.toString();
 
         await interaction.reply({
             content: `Content: ${message}`,
