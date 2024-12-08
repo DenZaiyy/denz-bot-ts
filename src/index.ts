@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request } from "express";
 import TwitchAPI from "./twitchAPI";
 import crypto from "crypto";
 import { config } from "./config";
@@ -6,8 +6,8 @@ const port = 8080;
 const app = express();
 
 const twitchApi = new TwitchAPI(
-    process.env.TWITCH_CLIENT_ID,
-    process.env.TWITCH_CLIENT_SECRET
+    process.env.TWITCH_CLIENT_ID as string,
+    process.env.TWITCH_CLIENT_SECRET as string
 );
 
 app.use(
@@ -90,7 +90,7 @@ app.post("/twitch/webhook", (req, res) => {
 });
 
 // Build the message used to get the HMAC.
-function getHmacMessage(request) {
+function getHmacMessage(request: Request | any) {
     return (
         request.headers[TWITCH_MESSAGE_ID] +
         request.headers[TWITCH_MESSAGE_TIMESTAMP] +
@@ -98,11 +98,11 @@ function getHmacMessage(request) {
     );
 }
 
-function getHmac(secret, message) {
+function getHmac(secret: string, message: string) {
     return crypto.createHmac("sha256", secret).update(message).digest("hex");
 }
 
-function verifyMessage(hmac, verifySignature) {
+function verifyMessage(hmac: string, verifySignature: string | any) {
     return crypto.timingSafeEqual(
         Buffer.from(hmac),
         Buffer.from(verifySignature)
