@@ -69,7 +69,7 @@ export const command: SlashCommand = {
                 },
             });
             await interaction.reply({
-                content: `❌ La chaîne ${platform} (${channel}) as été supprimer des notifications ❌`,
+                content: `❌ La chaîne ${platform} (${channel}) a été supprimée des notifications ❌`,
             });
             return;
         } else {
@@ -81,7 +81,7 @@ export const command: SlashCommand = {
                 },
             });
             await interaction.reply({
-                content: `✅ La chaîne ${platform} (${channel}) as été ajouté à la liste de notification ! ✅`,
+                content: `✅ La chaîne ${platform} (${channel}) a été ajoutée à la liste de notification ! ✅`,
             });
         }
     },
