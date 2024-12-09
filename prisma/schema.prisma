@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,18 +8,29 @@ datasource db {
 }
 
 model Guild {
-  guildId        String   @unique // Utilisé comme clé étrangère
-  name           String
-  prefix         String   @default("!")
-  welcomeChannel String?
-  members        Member[] @relation("GuildMembers")
+  guildId            String   @unique
+  name               String
+  prefix             String   @default("!")
+  welcomeChannel     String?
+  annoucementChannel String?
+  members            Member[] @relation("GuildMembers")
+  streamingLive      Live[]   @relation("GuildStreamingLive")
 }
 
 model Member {
-  userId   String    @unique
+  id       Int       @id @default(autoincrement())
+  userId   String
   userName String
   role     String
-  guild    Guild     @relation("GuildMembers", fields: [guildId], references: [guildId])
   guildId  String
   joinedAt DateTime? @default(now())
+  guild    Guild     @relation("GuildMembers", fields: [guildId], references: [guildId])
+}
+
+model Live {
+  id         Int     @id @default(autoincrement())
+  plateforme String
+  channel    String
+  guildId    String?
+  guild      Guild?  @relation("GuildStreamingLive", fields: [guildId], references: [guildId])
 }
