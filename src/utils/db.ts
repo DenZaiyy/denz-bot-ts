@@ -45,3 +45,24 @@ export async function getAllStreamLiveFromGuild(guildId: string) {
         prisma.$disconnect;
     }
 }
+
+export async function getWelcomeChannelFromGuild(guildId: string) {
+    try {
+        const guild = await prisma.guild.findUnique({
+            where: {
+                guildId: guildId,
+            },
+        });
+
+        if (!guild) {
+            console.error("Guild not found");
+            return null;
+        }
+
+        return guild.welcomeChannel;
+    } catch (error) {
+        console.error("Error fetching welcome channel from guild: ", error);
+    } finally {
+        prisma.$disconnect;
+    }
+}
