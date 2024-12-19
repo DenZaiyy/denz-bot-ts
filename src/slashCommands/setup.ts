@@ -58,7 +58,9 @@ export const command: SlashCommand = {
         const guildId = interaction.guild.id;
         const type = interaction.options.get("type")?.value?.toString();
         const existingChannelId = interaction.options.get("id")?.channel?.id;
-        const channelName = interaction.options.get("name")!.value!.toString();
+        const channelName =
+            interaction.options.get("name")?.value?.toString() ||
+            `${type}-channel`;
 
         // Récupère tous les channels de la guilde
         const guildChannels = await interaction.guild.channels.fetch();
@@ -99,6 +101,15 @@ export const command: SlashCommand = {
                 type: ChannelType.GuildText,
                 parent: denzBotCategory.id,
             });
+
+            await newChannel.permissionOverwrites.create(
+                interaction.guild.roles.everyone,
+                {
+                    ReadMessageHistory: true,
+                    ViewChannel: true,
+                    SendMessages: false,
+                }
+            );
 
             finalChannelId = newChannel.id;
         } else if (existingChildChannel) {
