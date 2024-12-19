@@ -54,36 +54,47 @@ module.exports = async (client: Client) => {
                 { body }
             );
         } else {
-            guilds.map((guild) => {
-                console.log(
-                    `⏳ [${guild.name}] Suppression et réactualisation des commandes...`
-                );
+            for (const guild of guilds) {
+                try {
+                    console.log(
+                        `⏳ [${guild.name}] Suppression et réactualisation des commandes...`
+                    );
 
-                rest.put(
-                    Routes.applicationGuildCommands(
-                        config.DISCORD_CLIENT_ID,
-                        guild.guildId
-                    ),
-                    {
-                        body: [],
-                    }
-                );
+                    await rest.put(
+                        Routes.applicationGuildCommands(
+                            config.DISCORD_CLIENT_ID,
+                            guild.guildId
+                        ),
+                        {
+                            body: [],
+                        }
+                    );
 
-                console.log(
-                    `✅ [${guild.name}] Commandes existantes supprimées.`
-                );
+                    console.log(
+                        `✅ [${guild.name}] Commandes existantes supprimées.`
+                    );
 
-                rest.put(
-                    Routes.applicationGuildCommands(
-                        config.DISCORD_CLIENT_ID,
-                        guild.guildId
-                    ),
-                    {
-                        body: body,
-                    }
-                );
-                console.log(`✅ [${guild.name}] Commands loaded !`);
-            });
+                    await rest.put(
+                        Routes.applicationGuildCommands(
+                            config.DISCORD_CLIENT_ID,
+                            guild.guildId
+                        ),
+                        {
+                            body: body,
+                        }
+                    );
+                    console.log(`✅ [${guild.name}] Commands loaded !`);
+                } catch (guildError) {
+                    console.error(
+                        `❌ [${guild.name}] Error updating commands:`,
+                        guildError
+                    );
+
+                    throw new Error(
+                        `Failed to load slash commands for guild [${guild.name}] (${guild.guildId}).`
+                    );
+                }
+            }
         }
     } catch (error) {
         console.error("❌ Erreur lors de la mise à jour des commandes:", error);
