@@ -13,8 +13,8 @@ model Guild {
   prefix             String   @default("!")
   welcomeChannel     String?
   annoucementChannel String?
-  members            Member[] @relation("GuildMembers")
   streamingLive      Live[]   @relation("GuildStreamingLive")
+  members            Member[] @relation("GuildMembers")
 }
 
 model Member {
