@@ -33,26 +33,7 @@ module.exports = async (client: Client) => {
             console.warn(
                 "⚠️ No guilds found in the database. Falling back to default guild."
             );
-            console.log("⏳ Suppression et réactualisation des commandes...");
-            // Suppression des commandes existantes (serveur spécifique)
-            await rest.put(
-                Routes.applicationGuildCommands(
-                    config.DISCORD_CLIENT_ID,
-                    config.DISCORD_GUILD_ID
-                ),
-                {
-                    body: [],
-                }
-            );
-            console.log("✅ Commandes existantes supprimées.");
-
-            await rest.put(
-                Routes.applicationGuildCommands(
-                    config.DISCORD_CLIENT_ID,
-                    config.DISCORD_GUILD_ID
-                ),
-                { body }
-            );
+            return;
         } else {
             for (const guild of guilds) {
                 try {
