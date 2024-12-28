@@ -11,11 +11,11 @@ npx prisma generate
 
 # Démarrer le serveur Express en arrière-plan
 echo "Starting Express server..."
-node dist/index.js &
+nodemon dist/index.js &
 
 # Démarrer le bot Discord
 echo "Starting Discord bot..."
-node dist/bot.js
+nodemon dist/bot.js
 
 # Garder le conteneur en vie
 tail -f /dev/null 

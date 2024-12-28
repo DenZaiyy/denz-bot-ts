@@ -9,6 +9,7 @@ COPY prisma ./prisma/
 # Installation des dépendances et génération de Prisma
 RUN npm install
 RUN npx prisma generate
+RUN npm install -g nodemon
 
 # Copie du reste des fichiers du projet
 COPY . .
