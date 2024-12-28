@@ -26,8 +26,23 @@ module.exports = async (client: Client) => {
 
             console.log(`✅ Slash Command: ${command.name} loaded!`);
         });
+        try {
+            await rest.put(
+                Routes.applicationCommands(config.DISCORD_CLIENT_ID),
+                {
+                    body,
+                }
+            );
 
-        const guilds = await prisma.guild.findMany();
+            console.log("✅ Commandes chargées !");
+        } catch (error) {
+            console.error(
+                "❌ Erreur lors du chargement des commandes: ",
+                error
+            );
+        }
+
+        /* const guilds = await prisma.guild.findMany();
 
         if (guilds.length === 0) {
             console.warn(
@@ -76,7 +91,7 @@ module.exports = async (client: Client) => {
                     );
                 }
             }
-        }
+        } */
     } catch (error) {
         console.error("❌ Erreur lors de la mise à jour des commandes:", error);
     }
