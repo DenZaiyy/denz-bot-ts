@@ -64,9 +64,19 @@ export const command: SlashCommand = {
         }
 
         if (amount === "all") {
-            await channel.bulkDelete(await channel.messages.fetch());
+            const messages = await channel.messages.fetch();
+
+            // check if messages are older than 14 days
+            const messagesUnder14Days = messages.filter(
+                (message) =>
+                    message.createdAt <
+                    new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+            );
+
+            await channel.bulkDelete(messagesUnder14Days);
             await interaction.reply({
-                content: "Tous les messages ont été supprimés.",
+                content:
+                    "Tous les messages inférieurs à 14 jours ont été supprimés.",
                 ephemeral: true,
             });
         } else {
