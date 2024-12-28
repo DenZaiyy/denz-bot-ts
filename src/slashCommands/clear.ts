@@ -49,7 +49,6 @@ export const command: SlashCommand = {
             return;
         }
 
-        const guildId = interaction.guild.id;
         const amount = interaction.options.get("amount")!.value!.toString();
 
         const channel = interaction.channel as TextChannel;
@@ -64,21 +63,40 @@ export const command: SlashCommand = {
         }
 
         if (amount === "all") {
-            const messages = await channel.messages.fetch();
+            try {
+                const messages = await channel.messages.fetch();
 
-            // check if messages are older than 14 days
-            const messagesUnder14Days = messages.filter(
-                (message) =>
-                    message.createdAt <
-                    new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
-            );
+                // Filtrer les messages de moins de 14 jours
+                const messagesUnder14Days = messages.filter(
+                    (message) =>
+                        message.createdAt >
+                        new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+                );
 
-            await channel.bulkDelete(messagesUnder14Days);
-            await interaction.reply({
-                content:
-                    "Tous les messages inférieurs à 14 jours ont été supprimés.",
-                ephemeral: true,
-            });
+                if (messagesUnder14Days.size === 0) {
+                    await interaction.reply({
+                        content: "Aucun message à supprimer n'a été trouvé.",
+                        ephemeral: true,
+                    });
+                    return;
+                }
+
+                await channel.bulkDelete(messagesUnder14Days);
+                await interaction.reply({
+                    content: `${messagesUnder14Days.size} messages ont été supprimés.`,
+                    ephemeral: true,
+                });
+            } catch (error) {
+                console.error(
+                    "Erreur lors de la suppression des messages:",
+                    error
+                );
+                await interaction.reply({
+                    content:
+                        "Une erreur est survenue lors de la suppression des messages.",
+                    ephemeral: true,
+                });
+            }
         } else {
             await channel.bulkDelete(
                 await channel.messages.fetch({ limit: parseInt(amount) })
