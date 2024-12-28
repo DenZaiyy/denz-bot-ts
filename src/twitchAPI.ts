@@ -44,40 +44,83 @@ export default class TwitchAPI {
         });
     }
 
+    public async getExistingSubscriptions() {
+        const response = await fetch(
+            "https://api.twitch.tv/helix/eventsub/subscriptions",
+            {
+                headers: {
+                    "Client-ID": this._clientID,
+                    Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
+                },
+            }
+        );
+        return await response.json();
+    }
+
     public async createSubscription() {
+        // Vérifier les souscriptions existantes
+        const existingSubs = await this.getExistingSubscriptions();
+
         const events = ["stream.online", "stream.offline"];
-        events.map(async (event) => {
-            const response = await fetch(
-                "https://api.twitch.tv/helix/eventsub/subscriptions",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Client-ID": this._clientID,
-                        Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
-                    },
-                    body: JSON.stringify({
-                        type: event,
-                        version: "1",
-                        condition: {
-                            broadcaster_user_id:
-                                await this.getTwitchIDFromUsername(
-                                    config.TWITCH_CHANNEL
-                                ),
-                        },
-                        transport: {
-                            method: "webhook",
-                            callback:
-                                "https://twelve-geese-bathe.loca.lt/twitch/webhook",
-                            secret: config.TWITCH_SECRET,
-                        },
-                    }),
-                }
+
+        for (const event of events) {
+            // Vérifier si la souscription existe déjà
+            const existingSub = existingSubs.data?.find(
+                (sub: any) => sub.type === event && sub.status === "enabled"
             );
 
-            if (response.status >= 300) {
-                console.error("Failed to create subscription", response);
+            if (existingSub) {
+                console.log(`Subscription for ${event} already exists`);
+                continue;
             }
-        });
+
+            try {
+                const response = await fetch(
+                    "https://api.twitch.tv/helix/eventsub/subscriptions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Client-ID": this._clientID,
+                            Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
+                        },
+                        body: JSON.stringify({
+                            type: event,
+                            version: "1",
+                            condition: {
+                                broadcaster_user_id:
+                                    await this.getTwitchIDFromUsername(
+                                        config.TWITCH_CHANNEL
+                                    ),
+                            },
+                            transport: {
+                                method: "webhook",
+                                callback: `${config.API_URL}/twitch/webhook`, // Utilisez une URL publique configurée
+                                secret: config.TWITCH_SECRET,
+                            },
+                        }),
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.status >= 300) {
+                    console.error(
+                        `Failed to create subscription for ${event}:`,
+                        data
+                    );
+                } else {
+                    console.log(
+                        `Successfully created subscription for ${event}:`,
+                        data
+                    );
+                }
+            } catch (error) {
+                console.error(
+                    `Error creating subscription for ${event}:`,
+                    error
+                );
+            }
+        }
     }
 }

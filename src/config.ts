@@ -8,6 +8,7 @@ const {
     TWITCH_CLIENT_SECRET,
     TWITCH_SECRET,
     TWITCH_CHANNEL,
+    API_URL,
 } = process.env;
 
 if (
@@ -16,7 +17,8 @@ if (
     !TWITCH_CLIENT_ID ||
     !TWITCH_CLIENT_SECRET ||
     !TWITCH_SECRET ||
-    !TWITCH_CHANNEL
+    !TWITCH_CHANNEL ||
+    !API_URL
 ) {
     throw new Error(
         "Missing environement variables. Please check your .env file."
@@ -30,4 +32,5 @@ export const config = {
     TWITCH_CLIENT_SECRET,
     TWITCH_SECRET,
     TWITCH_CHANNEL,
+    API_URL,
 };

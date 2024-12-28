@@ -1,32 +1,19 @@
-# Ignore node_modules directory
-node_modules/
-
-# Ignore log files
-*.log
-
-# Ignore build artifacts
-build/
-
-# Ignore environment configuration files
+# Environment variables
 .env
 .env.local
+.env.*.local
 
-# Ignore editor specific files
-.vscode/
-.idea/
+# Docker volumes
+mysql-data/
 
-# Ignore package lock files
-package-lock.json
-yarn.lock
+# Logs
+logs/
+*.log
 
-# Ignore compiled output
+# Node
+node_modules/
 dist/
 
-# Ignore database files
-*.db
-
-# Ignore temporary files
-*.tmp
 
 # Ignore OS generated files
 .DS_Store

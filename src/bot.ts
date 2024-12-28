@@ -24,6 +24,6 @@ readdirSync(handlersDirs).forEach((file) => {
     require(join(handlersDirs, file))(client);
 });
 
-setInterval(checkStreamStatus, 60000);
+setInterval(checkStreamStatus, 6000);
 
 client.login(config.DISCORD_TOKEN).catch(console.error);

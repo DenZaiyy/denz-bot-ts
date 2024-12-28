@@ -88,6 +88,12 @@ const event: BotEvent = {
 
                 console.log(`✅ Guild: ${guild.name} updated!`);
             }
+
+            // Recharger les commandes après l'ajout de la guild
+            const commandHandler = require("../handlers/commandHandler");
+            await commandHandler(guild.client);
+
+            console.log(`✅ Commands reloaded for new guild: ${guild.name}`);
         } catch (error) {
             console.error(`❌ Error handling guild: ${guild.name}`, error);
         } finally {
@@ -96,5 +102,4 @@ const event: BotEvent = {
         }
     },
 };
-
 export default event;

@@ -11,8 +11,7 @@ const twitchAPI = new TwitchAPI(
     config.TWITCH_CLIENT_SECRET
 );
 
-let notifiedChannels: { [key: string]: boolean; [guildId: number]: boolean } =
-    {};
+let notifiedChannels: { [key: string]: { [guildId: string]: boolean } } = {};
 let userName = "";
 let category = "";
 let streamTitle = "";
@@ -123,36 +122,38 @@ export async function sendStreamNotification(
 
 export async function checkStreamStatus() {
     const oauthToken = await twitchAPI.getTwitchOAuthToken();
-    if (oauthToken) {
-        const channels = await prisma.live.findMany({
-            select: {
-                channel: true,
-                guildId: true,
-            },
-            where: {
-                plateforme: "twitch",
-            },
-        });
-
-        for (const channel of channels) {
-            /* console.log(`Checking stream status for ${channel.channel}`); */
-            const isLive = await isStreamLive(oauthToken, channel.channel);
-
-            if (
-                isLive &&
-                !notifiedChannels[(channel.channel, channel.guildId!)]
-            ) {
-                await sendStreamNotification(channel.channel, channel.guildId!);
-                notifiedChannels[(channel.channel, channel.guildId!)] = true;
-            } else if (
-                !isLive &&
-                notifiedChannels[(channel.channel, channel.guildId!)]
-            ) {
-                notifiedChannels[(channel.channel, channel.guildId!)] = false;
-                console.log(`${channel.channel} is offline.`);
-            }
-        }
-    } else {
+    if (!oauthToken) {
         console.log("Twitch OAuth token not found.");
+        return;
+    }
+
+    const channels = await prisma.live.findMany({
+        select: {
+            channel: true,
+            guildId: true,
+        },
+        where: {
+            plateforme: "twitch",
+        },
+    });
+
+    for (const channel of channels) {
+        const isLive = await isStreamLive(oauthToken, channel.channel);
+
+        if (!notifiedChannels[channel.channel]) {
+            notifiedChannels[channel.channel] = {};
+        }
+
+        const hasNotified = notifiedChannels[channel.channel][channel.guildId!];
+
+        if (isLive && !hasNotified) {
+            await sendStreamNotification(channel.channel, channel.guildId!);
+            notifiedChannels[channel.channel][channel.guildId!] = true;
+        } else if (!isLive && hasNotified) {
+            notifiedChannels[channel.channel][channel.guildId!] = false;
+            // console.log(
+            //     `${channel.channel} is offline`
+            // );
+        }
     }
 }
