@@ -32,24 +32,47 @@ const event: BotEvent = {
             }
 
             // Supprimer le serveur de la base de données et tous ses membres
-
-            await prisma.member.deleteMany({
+            const guildMembers = await prisma.member.findMany({
                 where: {
                     guildId: guild.id,
                 },
             });
 
-            await prisma.live.deleteMany({
+            if (guildMembers) {
+                await prisma.member.deleteMany({
+                    where: {
+                        guildId: guild.id,
+                    },
+                });
+            }
+
+            const guildLives = await prisma.live.findMany({
                 where: {
                     guildId: guild.id,
                 },
             });
 
-            await prisma.guild.delete({
+            if (guildLives) {
+                await prisma.live.deleteMany({
+                    where: {
+                        guildId: guild.id,
+                    },
+                });
+            }
+
+            const guildDatas = await prisma.guild.findUnique({
                 where: {
                     guildId: guild.id,
                 },
             });
+
+            if (guildDatas) {
+                await prisma.guild.delete({
+                    where: {
+                        guildId: guild.id,
+                    },
+                });
+            }
         } catch (error) {
             console.error(`❌ Error handling guild: ${guild.name}`, error);
         } finally {

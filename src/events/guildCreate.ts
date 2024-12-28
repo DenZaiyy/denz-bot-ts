@@ -15,17 +15,6 @@ const event: BotEvent = {
     once: false,
     execute: async (guild) => {
         try {
-            // Trouver le canal de bienvenue
-            const welcomeChannel = guild.channels.cache.find(
-                (channel: GuildChannel) => {
-                    return (
-                        channel.type === ChannelType.GuildText &&
-                        (channel.name.toLowerCase().includes("welcome") ||
-                            channel.name.toLowerCase().includes("bienvenue"))
-                    );
-                }
-            ) as TextChannel | undefined;
-
             // Vérifier si le serveur existe déjà dans la base de données
             const existingGuild = await prisma.guild.findUnique({
                 where: {
@@ -39,14 +28,8 @@ const event: BotEvent = {
                     data: {
                         guildId: guild.id,
                         name: guild.name,
-                        welcomeChannel: welcomeChannel
-                            ? welcomeChannel.id
-                            : null,
                     },
                 });
-                console.log(newGuild);
-
-                prisma.$disconnect();
 
                 // Récupérer les membres du serveur
                 const members = await guild.members.fetch();
@@ -80,9 +63,6 @@ const event: BotEvent = {
                     },
                     data: {
                         name: guild.name,
-                        welcomeChannel: welcomeChannel
-                            ? welcomeChannel.id
-                            : null,
                     },
                 });
 
