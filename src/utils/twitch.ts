@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { DMChannel, NewsChannel, TextChannel } from "discord.js";
+import { DMChannel, EmbedBuilder, NewsChannel, TextChannel } from "discord.js";
 import { client } from "../bot";
 import { prisma, twitchAPI } from "./variables";
 
@@ -7,7 +7,10 @@ let notifiedChannels: { [key: string]: { [guildId: string]: boolean } } = {};
 let userName = "";
 let category = "";
 let streamTitle = "";
+let viewerCount = "";
 let gameLink = "";
+let width = 1920;
+let height = 1080;
 
 export async function isStreamLive(
   oauthToken: string,
@@ -28,6 +31,7 @@ export async function isStreamLive(
       userName = data.data[0]?.user_name;
       category = data.data[0]?.game_name;
       streamTitle = data.data[0]?.title;
+      viewerCount = data.data[0]?.viewer_count;
       gameLink = await getGameLink(data.data[0]?.game_id);
     }
 
@@ -63,10 +67,53 @@ async function getGameLink(gameId: string): Promise<string> {
   }
 }
 
+async function getTwitchAvatar(twitchChannel: string) {
+  const url = `https://api.twitch.tv/helix/users?login=${twitchChannel}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "Client-Id": config.TWITCH_CLIENT_ID,
+        Authorization: `Bearer ${await twitchAPI.getTwitchOAuthToken()}`,
+      },
+    });
+
+    const data = await response.json();
+
+    const profilePicture = data.data[0].profile_image_url;
+
+    return profilePicture;
+  } catch (error) {
+    console.error(`Error getting infos for ${twitchChannel} : `, error);
+    return "";
+  }
+}
+
 export async function sendStreamNotification(
   streamerName: string,
   guildId: string,
 ) {
+  const embed = new EmbedBuilder()
+    .setColor("#A970FF")
+    .setTitle("Twitch Live - ON")
+    .setURL(`https://twitch.tv/${streamerName}`)
+    .setDescription(
+      `🚨 Hey les amies ! 🚨\n\nLe streamer **${userName}** a lancé son live sur twitch !\n\nN'hésite pas à lui rendre visite ici : https://twitch.tv/${streamerName}`,
+    )
+    .setAuthor({
+      name: client.user ? client.user.username : userName,
+      iconURL: client.user ? client.user.displayAvatarURL() : "",
+    })
+    .setTimestamp()
+    .addFields(
+      { name: "Titre:", value: streamTitle, inline: false },
+      { name: "Catégorie:", value: category, inline: true },
+      { name: "Viewers:", value: viewerCount.toString(), inline: true },
+    )
+    .setImage(
+      `https://static-cdn.jtvnw.net/previews-ttv/live_user_${streamerName}-${width}x${height}.jpg`,
+    )
+    .setThumbnail(await getTwitchAvatar(streamerName));
   try {
     const liveChannel = await prisma.guild.findUnique({
       select: {
@@ -97,9 +144,7 @@ export async function sendStreamNotification(
       channel instanceof NewsChannel ||
       channel instanceof DMChannel
     ) {
-      await channel.send(
-        `🚨 @everyone **${userName}** viens de lancer son live sur Twitch!\n**Titre:** ${streamTitle}\n**Catégorie:** ${category}\nRejoint le ici: https://www.twitch.tv/${streamerName} 🚨`,
-      );
+      await channel.send({ content: "@everyone", embeds: [embed] });
     } else {
       console.log(
         "Could not find the Discord channel or it is not a text channel.",
