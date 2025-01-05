@@ -8,15 +8,19 @@ denz-Bot is a Discord bot built using TypeScript and the discord.js library.
 
 1. Clone the repository:
 
-    ```bash
-    git clone https://github.com/your-username/denz-bot.git
-    ```
+   ```bash
+   git clone https://github.com/DenZaiyy/denz-bot-ts.git
+   ```
 
 2. Install dependencies using pnpm:
 
-    ```bash
-    pnpm install
-    ```
+   ```bash
+   pnpm install
+   ```
+
+## Dependencies
+   - prisma 
+   - express
 
 ## Configuration
 
@@ -26,15 +30,15 @@ denz-Bot is a Discord bot built using TypeScript and the discord.js library.
 
 3. Copy the bot token and paste it in the `.env` file:
 
-    ```plaintext
-    DISCORD_TOKEN=your-bot-token
-    ```
+   ```plaintext
+   DISCORD_TOKEN=your-bot-token
+   ```
 
 4. Copy the bot client id and paste it in the `.env` file:
 
-    ```plaintext
-    DISCORD_CLIENT_ID=your-client-id
-    ```
+   ```plaintext
+   DISCORD_CLIENT_ID=your-client-id
+   ```
 
 ## Usage
 
@@ -42,24 +46,24 @@ After install & build typescript files, you can launch the bot using this comman
 
 1. To simple start bot with existing files:
 
-    ```bash
-    pnpm start
-    ```
+   ```bash
+   pnpm start
+   ```
 
 2. To restart bot with every changes:
-    ```bash
-    pnpm dev
-    ```
+   ```bash
+   pnpm dev
+   ```
 
 You can evently build typescript files everytime file are changed:
 
 1. To simple build ts files:
 
-    ```bash
-    pnpm build
-    ```
+   ```bash
+   pnpm build
+   ```
 
 2. To build everytime files change:
-    ```bash
-    pnpm watch
-    ```
+   ```bash
+   pnpm watch
+   ```
