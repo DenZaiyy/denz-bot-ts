@@ -6,8 +6,8 @@ setup:
 	sudo apt-get install -y docker.io docker-compose
 	sudo systemctl enable docker
 	sudo systemctl start docker
-	# Création du fichier .env à partir de .env.example si non existant
-	test -f .env || cp .env.example .env
+	# Création du fichier .env.local à partir de .env.example si non existant
+	test -f .env.local || cp .env.example .env.local
 
 deploy:
 	docker-compose --env-file .env.local down
@@ -22,3 +22,6 @@ logs:
 clean:
 	docker-compose down -v
 	docker system prune -af
+
+prettier:
+	npx prettier --write ./src
