@@ -8,41 +8,36 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 module.exports = async (client: Client) => {
-    const body: Array<SlashCommand> = [];
+  const body: Array<SlashCommand> = [];
 
-    const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
+  const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
 
+  try {
+    let slashCommandsDir = join(__dirname, "../slashCommands");
+
+    readdirSync(slashCommandsDir).forEach((file) => {
+      if (!file.endsWith(".js")) return;
+
+      const command: SlashCommand = require(
+        `${slashCommandsDir}/${file}`,
+      ).command;
+
+      body.push(command.data.toJSON());
+      client.slashCommands.set(command.name, command);
+
+      console.log(`✅ Slash Command: ${command.name} loaded!`);
+    });
     try {
-        let slashCommandsDir = join(__dirname, "../slashCommands");
+      await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
+        body,
+      });
 
-        readdirSync(slashCommandsDir).forEach((file) => {
-            if (!file.endsWith(".js")) return;
+      console.log("✅ Commandes chargées !");
+    } catch (error) {
+      console.error("❌ Erreur lors du chargement des commandes: ", error);
+    }
 
-            const command: SlashCommand =
-                require(`${slashCommandsDir}/${file}`).command;
-
-            body.push(command.data.toJSON());
-            client.slashCommands.set(command.name, command);
-
-            console.log(`✅ Slash Command: ${command.name} loaded!`);
-        });
-        try {
-            await rest.put(
-                Routes.applicationCommands(config.DISCORD_CLIENT_ID),
-                {
-                    body,
-                }
-            );
-
-            console.log("✅ Commandes chargées !");
-        } catch (error) {
-            console.error(
-                "❌ Erreur lors du chargement des commandes: ",
-                error
-            );
-        }
-
-        /* const guilds = await prisma.guild.findMany();
+    /* const guilds = await prisma.guild.findMany();
 
         if (guilds.length === 0) {
             console.warn(
@@ -92,7 +87,7 @@ module.exports = async (client: Client) => {
                 }
             }
         } */
-    } catch (error) {
-        console.error("❌ Erreur lors de la mise à jour des commandes:", error);
-    }
+  } catch (error) {
+    console.error("❌ Erreur lors de la mise à jour des commandes:", error);
+  }
 };
