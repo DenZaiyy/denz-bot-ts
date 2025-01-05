@@ -19,4 +19,6 @@ RUN npm run build
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+EXPOSE 443 8081 8080 80
+
 ENTRYPOINT ["docker-entrypoint.sh"]
