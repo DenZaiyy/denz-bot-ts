@@ -28,9 +28,10 @@ model Member {
 }
 
 model Live {
-  id         Int     @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   plateforme String
   channel    String
+  streamDate DateTime?
   guildId    String?
-  guild      Guild?  @relation("GuildStreamingLive", fields: [guildId], references: [guildId])
+  guild      Guild?    @relation("GuildStreamingLive", fields: [guildId], references: [guildId])
 }
