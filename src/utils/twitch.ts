@@ -210,3 +210,14 @@ export async function checkStreamStatus() {
 		}
 	}
 }
+
+export async function updateLive(channel: string, date: boolean) {
+	try {
+		await prisma.live.updateMany({
+			where: { channel },
+			data: { streamDate: date ? new Date() : null },
+		})
+	} catch (error) {
+		console.error(`Failed to update live status for ${channel}:`, error)
+	}
+}

@@ -3,12 +3,7 @@ services:
     build: .
     env_file: .env.local
     ports:
-      - "8080:8080"
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./config/server.crt:/etc/ssl/certs/server.crt
-      - ./config/server.key:/etc/ssl/private/server.key
+      - "3000:3000"
     depends_on:
       - db
     networks:
@@ -34,7 +29,7 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     ports:
-      - "8081:80"
+      - "8081:8081"
     environment:
       - PMA_HOST=db
       #- PMA_USER=${MYSQL_USER}
