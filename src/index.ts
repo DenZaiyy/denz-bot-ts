@@ -25,8 +25,9 @@ app.use(
 )
 
 app.get("/", (req, res) => {
-	console.log(twitchAPI.createSubscription("chrisd_tv"))
-	res.send("Subscription testings")
+	//console.log(twitchAPI.createSubscription("chrisd_tv"))
+	//res.send("Subscription testings")
+	res.send("Welcome to node.js app")
 })
 
 app.listen(port, () => {

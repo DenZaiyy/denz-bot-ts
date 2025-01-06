@@ -18,6 +18,6 @@ RUN npm run build
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 3306 8081 3000
+EXPOSE 3000 8081 80 3306
 
 ENTRYPOINT ["docker-entrypoint.sh"]

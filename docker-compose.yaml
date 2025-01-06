@@ -1,6 +1,20 @@
 services:
+  nginx:
+    build:
+      context: ./nginx
+    container_name: bot_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - bot-network
+    depends_on:
+      - bot
+      - phpmyadmin
+
   bot:
     build: .
+    container_name: bot_app
     env_file: .env.local
     ports:
       - "3000:3000"
@@ -11,6 +25,7 @@ services:
 
   db:
     image: mysql:8.0
+    container_name: bot_db
     env_file: .env.local
     ports:
       - "3306:3306"
@@ -28,6 +43,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
+    container_name: bot_PMA
     ports:
       - "8081:8081"
     environment:

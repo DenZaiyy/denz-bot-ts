@@ -1,4 +1,4 @@
-.PHONY: setup deploy restart logs
+.PHONY: setup deploy restart logs rebuild prettier
 
 setup:
 	# Installation de Docker et Docker Compose
@@ -11,6 +11,9 @@ setup:
 
 deploy:
 	docker-compose --env-file .env.local down
+	docker-compose --env-file .env.local up -d
+
+rebuild:
 	docker-compose --env-file .env.local up -d --build
 
 restart:
