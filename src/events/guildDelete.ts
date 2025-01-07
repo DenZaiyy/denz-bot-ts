@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 const event: BotEvent = {
 	name: Events.GuildDelete,
-	once: true,
+	once: false,
 	execute: async (guild) => {
 		try {
 			// Supprimer les channels crée dans la catégorie "denz-bot"

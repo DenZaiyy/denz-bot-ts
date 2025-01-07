@@ -3,9 +3,6 @@ import { join } from "path"
 import { readdirSync } from "fs"
 import { SlashCommand } from "../types"
 import { config } from "../config"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
 
 module.exports = async (client: Client) => {
 	const body: Array<SlashCommand> = []

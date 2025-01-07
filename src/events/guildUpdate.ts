@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 const event: BotEvent = {
 	name: Events.GuildUpdate,
-	once: true,
+	once: false,
 	execute: async (oldGuild, newGuild) => {
 		try {
 			// check if oldGuild exists in database
