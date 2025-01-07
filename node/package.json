@@ -1,0 +1,20 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "npx tsc",
+    "watch": "npx tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DenZaiyy/denz-bot-ts.git"
+  },
+  "private": true,
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "express": "^4.21.2"
+  }
+}
