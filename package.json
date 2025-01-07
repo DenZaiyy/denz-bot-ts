@@ -4,7 +4,7 @@
     "description": "BOT Discord named denZ-Bot created to manage streams notifications and setup channels for announcements and other stuff",
     "main": "index.ts",
     "scripts": {
-        "start": "node dist/bot.js",
+        "start": "node dist/bot.js && node dist/index.js",
         "dev": "clear && nodemon dist/bot.js",
         "router": "nodemon dist/index.js",
         "build": "npx tsc",

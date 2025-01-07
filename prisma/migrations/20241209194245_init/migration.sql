@@ -4,7 +4,7 @@ CREATE TABLE "Guild" (
     "name" TEXT NOT NULL,
     "prefix" TEXT NOT NULL DEFAULT '!',
     "welcomeChannel" TEXT,
-    "annoucementChannel" TEXT
+    "announcementChannel" TEXT
 );
 
 -- CreateTable

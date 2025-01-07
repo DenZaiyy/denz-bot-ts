@@ -11,8 +11,8 @@ RUN npm install
 RUN npx prisma generate
 
 # Copie du reste des fichiers du projet
-COPY . .
-RUN npm run build
+COPY /dist .
+#RUN npm run build
 
 # Point d'entrée pour démarrer Express et le bot Discord
 COPY docker-entrypoint.sh /usr/local/bin/

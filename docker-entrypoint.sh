@@ -9,13 +9,13 @@ echo "Running Prisma migrations..."
 npx prisma db push --accept-data-loss
 npx prisma generate
 
-# Démarrer le serveur Express en arrière-plan
-echo "Starting Express server..."
-node dist/index.js &
-
 # Démarrer le bot Discord
 echo "Starting Discord bot..."
-node dist/bot.js
+node bot.js &
+
+# Démarrer le serveur Express en arrière-plan
+echo "Starting Express server..."
+node index.js
 
 # Garder le conteneur en vie
 tail -f /dev/null 

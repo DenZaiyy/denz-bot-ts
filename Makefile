@@ -10,11 +10,14 @@ setup:
 	test -f .env.local || cp .env.example .env.local
 
 deploy:
+	npm run build
 	docker-compose --env-file .env.local down
 	docker-compose --env-file .env.local up -d
 
 rebuild:
+	npm run build
 	docker-compose --env-file .env.local up -d --build
+	docker exec bot_nginx nginx -s reload
 
 restart:
 	docker-compose restart
@@ -23,7 +26,7 @@ logs:
 	docker-compose logs -f
 
 clean:
-	docker-compose down -v
+	docker-compose down
 	docker system prune -af
 
 prettier:
