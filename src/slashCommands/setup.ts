@@ -1,13 +1,12 @@
 import {
 	ChannelType,
 	Guild,
+	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
 } from "discord.js"
 import { SlashCommand } from "../types"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { prisma } from "../utils/variables"
 
 export const command: SlashCommand = {
 	name: "setup",
@@ -20,8 +19,8 @@ export const command: SlashCommand = {
 				.setDescription("Type de channel à créer.")
 				.setChoices(
 					{
-						name: "annoucement",
-						value: "annoucement",
+						name: "announcement",
+						value: "announcement",
 					},
 					{
 						name: "welcome",
@@ -49,7 +48,7 @@ export const command: SlashCommand = {
 		if (!interaction.guild) {
 			await interaction.reply({
 				content: "Cette commande doit être utilisée dans un serveur Discord.",
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			})
 			return
 		}
@@ -129,7 +128,7 @@ export const command: SlashCommand = {
 		// Répond à l'utilisateur
 		await interaction.reply({
 			content: `Le channel ${type} a été configuré avec succès : <#${finalChannelId}>`,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		})
 	},
 }

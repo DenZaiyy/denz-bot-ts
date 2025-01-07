@@ -1,13 +1,10 @@
 import {
+	MessageFlags,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
-	TextBasedChannel,
 	TextChannel,
 } from "discord.js"
 import { SlashCommand } from "../types"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
 
 export const command: SlashCommand = {
 	name: "clear",
@@ -43,7 +40,7 @@ export const command: SlashCommand = {
 		if (!interaction.guild) {
 			await interaction.reply({
 				content: "Cette commande doit être utilisée dans un serveur Discord.",
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			})
 			return
 		}
@@ -56,7 +53,7 @@ export const command: SlashCommand = {
 			await interaction.reply({
 				content:
 					"Cette commande ne peut être utilisée que dans un canal de texte.",
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			})
 			return
 		}
@@ -74,7 +71,7 @@ export const command: SlashCommand = {
 				if (messagesUnder14Days.size === 0) {
 					await interaction.reply({
 						content: "Aucun message à supprimer n'a été trouvé.",
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					})
 					return
 				}
@@ -82,14 +79,14 @@ export const command: SlashCommand = {
 				await channel.bulkDelete(messagesUnder14Days)
 				await interaction.reply({
 					content: `${messagesUnder14Days.size} messages ont été supprimés.`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 			} catch (error) {
 				console.error("Erreur lors de la suppression des messages:", error)
 				await interaction.reply({
 					content:
 						"Une erreur est survenue lors de la suppression des messages.",
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 			}
 		} else {
@@ -98,7 +95,7 @@ export const command: SlashCommand = {
 			)
 			await interaction.reply({
 				content: `Les ${amount} derniers messages ont été supprimés.`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			})
 		}
 	},

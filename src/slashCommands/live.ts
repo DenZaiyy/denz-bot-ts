@@ -1,4 +1,8 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import {
+	MessageFlags,
+	PermissionFlagsBits,
+	SlashCommandBuilder,
+} from "discord.js"
 import { SlashCommand } from "../types"
 import { prisma, twitchAPI } from "../utils/variables"
 
@@ -34,7 +38,7 @@ export const command: SlashCommand = {
 		if (!interaction.guild) {
 			await interaction.reply({
 				content: "Cette commande doit être utilisée dans un serveur Discord.",
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			})
 			return
 		}
@@ -52,7 +56,7 @@ export const command: SlashCommand = {
 			if (twitchId.data.lenght === 0) {
 				await interaction.reply({
 					content: `❌ La chaîne ${channel} n'existe pas sur Twitch ❌`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 				return
 			}
@@ -75,14 +79,20 @@ export const command: SlashCommand = {
 					id: existingLivePlatform.id,
 				},
 			})
+
+			const broadcasterID = twitchAPI
+				.getTwitchIDFromUsername(channel)
+				.toString()
+
+			await twitchAPI.deleteSubscriptionByBroascaster(broadcasterID)
+
 			await interaction.reply({
 				content: `❌ La chaîne ${platform} (${channel}) a été supprimée des notifications ❌`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			})
 			return
 		} else {
 			try {
-				//await twitchAPI.createSubscription(channel);
 				await prisma.live.create({
 					data: {
 						plateforme: platform,
@@ -90,14 +100,15 @@ export const command: SlashCommand = {
 						guildId: guildId,
 					},
 				})
+				await twitchAPI.createSubscription(channel)
 				await interaction.reply({
 					content: `✅ La chaîne ${platform} (${channel}) a été ajoutée à la liste de notification ! ✅`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 			} catch (error) {
 				await interaction.reply({
 					content: `❌ Erreur lors de la création de l'abonnement ❌`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 				console.log("Error creating subscriptions : ", error)
 				return
