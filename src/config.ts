@@ -22,9 +22,7 @@ if (
 	!API_URL ||
 	!SSL_PASSPHRASE
 ) {
-	throw new Error(
-		"Missing environement variables. Please check your .env file."
-	)
+	throw new Error("Missing environment variables. Please check your .env file.")
 }
 
 export const config = {
