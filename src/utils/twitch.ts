@@ -1,20 +1,20 @@
 import { config } from "../config"
 import {
+	Colors,
 	DMChannel,
 	EmbedBuilder,
 	NewsChannel,
 	TextChannel,
-	Colors,
 } from "discord.js"
 import { client } from "../bot"
 import { prisma, twitchAPI } from "./variables"
 
-let notifiedChannels: { [key: string]: { [guildId: string]: boolean } } = {}
+//let notifiedChannels: { [key: string]: { [guildId: string]: boolean } } = {}
 let userName = ""
 let category = ""
 let streamTitle = ""
 let viewerCount = ""
-let gameLink = ""
+//let gameLink = ""
 let width = 1920
 let height = 1080
 
@@ -49,7 +49,7 @@ export async function isStreamLive(
 			category = data.data[0]?.game_name
 			streamTitle = data.data[0]?.title
 			viewerCount = data.data[0]?.viewer_count
-			gameLink = await getGameLink(data.data[0]?.game_id)
+			//gameLink = await getGameLink(data.data[0]?.game_id)
 		}
 
 		return data.data.length > 0
@@ -59,7 +59,7 @@ export async function isStreamLive(
 	}
 }
 
-async function getGameLink(gameId: string): Promise<string> {
+/*async function getGameLink(gameId: string): Promise<string> {
 	const url = `https://api.twitch.tv/helix/games?id=${gameId}`
 	try {
 		const response = await fetch(url, {
@@ -82,7 +82,7 @@ async function getGameLink(gameId: string): Promise<string> {
 		console.error(`Error getting game link for game id ${gameId}:`, error)
 		return ""
 	}
-}
+}*/
 
 async function getTwitchAvatar(twitchChannel: string) {
 	const url = `https://api.twitch.tv/helix/users?login=${twitchChannel}`
@@ -97,9 +97,7 @@ async function getTwitchAvatar(twitchChannel: string) {
 
 		const data = await response.json()
 
-		const profilePicture = data.data[0].profile_image_url
-
-		return profilePicture
+		return data.data[0].profile_image_url
 	} catch (error) {
 		console.error(`Error getting infos for ${twitchChannel} : `, error)
 		return ""
@@ -135,7 +133,7 @@ export async function sendStreamNotification(
 	try {
 		const liveChannel = await prisma.guild.findUnique({
 			select: {
-				annoucementChannel: true,
+				announcementChannel: true,
 				name: true,
 			},
 			where: {
@@ -148,14 +146,14 @@ export async function sendStreamNotification(
 			return
 		}
 
-		if (!liveChannel.annoucementChannel) {
+		if (!liveChannel.announcementChannel) {
 			console.log(
-				`[${liveChannel.name}] No annoucement channel found for guild.`
+				`[${liveChannel.name}] No announcement channel found for guild.`
 			)
 			return
 		}
 
-		const channel = await client.channels.fetch(liveChannel.annoucementChannel)
+		const channel = await client.channels.fetch(liveChannel.announcementChannel)
 
 		if (
 			channel instanceof TextChannel ||
@@ -163,6 +161,7 @@ export async function sendStreamNotification(
 			channel instanceof DMChannel
 		) {
 			await channel.send({ content: "@everyone", embeds: [embed] })
+			console.log("Notification sent to Discord channel.")
 		} else {
 			console.log(
 				"Could not find the Discord channel or it is not a text channel."
@@ -173,7 +172,7 @@ export async function sendStreamNotification(
 	}
 }
 
-export async function checkStreamStatus() {
+/*export async function checkStreamStatus() {
 	const oauthToken = await twitchAPI.getTwitchOAuthToken()
 	if (!oauthToken) {
 		console.log("Twitch OAuth token not found.")
@@ -207,6 +206,33 @@ export async function checkStreamStatus() {
 			// console.log(
 			//     `${channel.channel} is offline`
 			// );
+		}
+	}
+}*/
+
+export async function twitchEventTrigger() {
+	const channels = await prisma.live.findMany({
+		select: {
+			channel: true,
+			streamDate: true,
+			guildId: true,
+		},
+		where: {
+			plateforme: "twitch",
+		},
+	})
+
+	if (!channels) {
+		return
+	}
+
+	for (const channel of channels) {
+		try {
+			if (channel && channel.streamDate && channel.guildId) {
+				await sendStreamNotification(channel.channel, channel.guildId)
+			}
+		} catch (error) {
+			console.error("Error to send notification on discord: ", error)
 		}
 	}
 }

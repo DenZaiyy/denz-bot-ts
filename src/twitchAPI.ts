@@ -47,6 +47,7 @@ export default class TwitchAPI {
 			{
 				method: "GET",
 				headers: {
+					"Content-Type": "application/json",
 					"Client-ID": this._clientID,
 					Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
 				},
@@ -67,17 +68,76 @@ export default class TwitchAPI {
 			"https://api.twitch.tv/helix/eventsub/subscriptions",
 			{
 				headers: {
+					"Content-Type": "application/json",
 					"Client-ID": this._clientID,
 					Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
 				},
 			}
 		)
+
 		return await response.json()
+	}
+
+	public async deleteAllSubscriptions() {
+		const subscriptions = await this.getExistingSubscriptions()
+		const subData = subscriptions.data
+
+		for (const sub of subData) {
+			try {
+				await fetch(
+					`https://api.twitch.tv/helix/eventsub/subscriptions?id=${sub.id}`,
+					{
+						method: "DELETE",
+						headers: {
+							"Client-ID": this._clientID,
+							Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
+						},
+					}
+				)
+			} catch (error) {
+				console.error("An error with delete subscriptions: ", error)
+			}
+		}
+	}
+
+	public async deleteSubscriptionByBroascaster(broadcasterID: string) {
+		try {
+			const existingSubscription = await this.getExistingSubscriptions()
+			const subscriptionData = existingSubscription.data
+			const subscriptionsIDS = []
+
+			for (const sub of subscriptionData) {
+				console.log("Foreach subscription: ", sub)
+				if (sub.condition.broadcaster_user_id === broadcasterID) {
+					const id = sub.id
+					subscriptionsIDS.push(id)
+				}
+			}
+
+			for (const id of subscriptionsIDS) {
+				await fetch(
+					`https://api.twitch.tv/helix/eventsub/subscriptions?id=${id}`,
+					{
+						method: "DELETE",
+						headers: {
+							"Client-ID": this._clientID,
+							Authorization: `Bearer ${await this.getTwitchOAuthToken()}`,
+						},
+					}
+				)
+				console.log(`Subscription with id : ${id} deleted.`)
+			}
+		} catch (error) {
+			console.error(
+				"Something wrong when u tried to delete subscriptions by broadcaster",
+				error
+			)
+		}
 	}
 
 	public async createSubscription(twitchChannel: string) {
 		// Vérifier les souscriptions existantes
-		const existingSubs = await this.getExistingSubscriptions()
+		//const existingSubs = await this.getExistingSubscriptions()
 
 		const events = ["stream.online", "stream.offline"]
 
@@ -113,7 +173,7 @@ export default class TwitchAPI {
 							type: event,
 							version: "1",
 							condition: {
-								broadcaster_user_id: twitchID,
+								broadcaster_user_id: twitchID.toString(),
 							},
 							transport: {
 								method: "webhook",
@@ -125,8 +185,6 @@ export default class TwitchAPI {
 				)
 
 				const data = await response.json()
-
-				console.log("condition: ", data.condition.broadcaster_user_id)
 
 				if (response.status >= 300) {
 					console.error(`Failed to create subscription for ${event}:`, data)
