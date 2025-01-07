@@ -3,7 +3,7 @@ import { Client, Collection, GatewayIntentBits } from "discord.js"
 import { readdirSync } from "fs"
 import { join } from "path"
 import { config } from "./config"
-import { checkStreamStatus } from "./utils/twitch"
+//import { checkStreamStatus } from "./utils/twitch"
 
 export const client = new Client({
 	intents: [
@@ -24,6 +24,6 @@ readdirSync(handlersDirs).forEach((file) => {
 	require(join(handlersDirs, file))(client)
 })
 
-setInterval(checkStreamStatus, 6000)
+//setInterval(checkStreamStatus, 6000)
 
 client.login(config.DISCORD_TOKEN).catch(console.error)
