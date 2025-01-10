@@ -25,7 +25,7 @@ app.use(
 )
 
 app.get("/", async (req, res) => {
-	//console.log(await twitchAPI.deleteAllSubscriptions())
+	console.log(await twitchAPI.deleteAllSubscriptions())
 	/* console.log(twitchAPI.createSubscription("denzdev"))
 	console.log(
 		"Exists subscriptions root express:",

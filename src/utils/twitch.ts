@@ -29,16 +29,14 @@ const colors = [
 	Colors.Green,
 ]
 
-export async function isStreamLive(
-	oauthToken: string,
-	channel: string
-): Promise<boolean> {
+export async function isStreamLive(channel: string): Promise<boolean> {
+	const oAuth = await twitchAPI.getTwitchOAuthToken()
 	const url = `https://api.twitch.tv/helix/streams?user_login=${channel}`
 	try {
 		const response = await fetch(url, {
 			headers: {
 				"Client-Id": config.TWITCH_CLIENT_ID,
-				Authorization: `Bearer ${oauthToken}`,
+				Authorization: `Bearer ${oAuth}`,
 			},
 		})
 
@@ -122,8 +120,16 @@ export async function sendStreamNotification(
 		})
 		.setTimestamp()
 		.addFields(
-			{ name: "Titre:", value: streamTitle, inline: false },
-			{ name: "Catégorie:", value: category, inline: true },
+			{
+				name: "Titre:",
+				value: streamTitle ? streamTitle : "Aucun titre",
+				inline: false,
+			},
+			{
+				name: "Catégorie:",
+				value: category ? category : "Aucune catégorie",
+				inline: true,
+			},
 			{ name: "Viewers:", value: viewerCount.toString(), inline: true }
 		)
 		.setImage(
@@ -229,7 +235,13 @@ export async function twitchEventTrigger() {
 	for (const channel of channels) {
 		try {
 			if (channel && channel.streamDate && channel.guildId) {
-				await sendStreamNotification(channel.channel, channel.guildId)
+				setTimeout(() => {
+					isStreamLive(channel.channel)
+				}, 6000)
+				const live = await isStreamLive(channel.channel)
+				if (live) {
+					await sendStreamNotification(channel.channel, channel.guildId)
+				}
 			}
 		} catch (error) {
 			console.error("Error to send notification on discord: ", error)
