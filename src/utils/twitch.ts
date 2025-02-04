@@ -130,7 +130,7 @@ export async function sendStreamNotification(
 				value: category ? category : "Aucune catégorie",
 				inline: true,
 			},
-			{ name: "Viewers:", value: viewerCount.toString(), inline: true }
+			{ name: "Viewers:", value: viewerCount? viewerCount.toString() : "0", inline: true }
 		)
 		.setImage(
 			`https://static-cdn.jtvnw.net/previews-ttv/live_user_${streamerName}-${width}x${height}.jpg`
