@@ -100,7 +100,7 @@ export default class TwitchAPI {
 		}
 	}
 
-	public async deleteSubscriptionByBroascaster(broadcasterID: string) {
+	public async deleteSubscriptionByBroadcaster(broadcasterID: string) {
 		try {
 			const existingSubscription = await this.getExistingSubscriptions()
 			const subscriptionData = existingSubscription.data

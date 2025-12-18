@@ -53,7 +53,7 @@ export const command: SlashCommand = {
 			// check if channelname is valid for twitch before creating subscription
 			const twitchId = await twitchAPI.checkIfChannelExist(channel)
 
-			if (twitchId.data.lenght === 0) {
+			if (twitchId.data.length === 0) {
 				await interaction.reply({
 					content: `❌ La chaîne ${channel} n'existe pas sur Twitch ❌`,
 					flags: MessageFlags.Ephemeral,
